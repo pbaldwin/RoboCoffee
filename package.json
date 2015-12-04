@@ -1,0 +1,25 @@
+{
+  "name": "robocoffee",
+  "version": "1.0.0",
+  "description": "A router driven static site generator.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Static",
+    "Site",
+    "Generator",
+    "Static",
+    "HTML",
+    "Handlebars",
+    "Markdown"
+  ],
+  "author": "Patrick Baldwin",
+  "license": "ISC",
+  "dependencies": {
+    "handlebars": "^4.0.5",
+    "lodash": "^3.10.1",
+    "marked": "^0.3.5"
+  }
+}
