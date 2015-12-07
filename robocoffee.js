@@ -17,6 +17,7 @@ var template = require('./lib/template');
 var properties = {};
 var options = {};
 
+
 var writeFile = function (fileName, page) {
   fs.writeFile(options.dist + '/' + fileName, page, function (err) {
     if (err) throw err;
@@ -38,11 +39,8 @@ var readFile = function (name) {
 };
 
 
-
-
-
 /**
- * RoboCoffee Con=structor
+ * RoboCoffee Constructor
  */
 var RoboCoffee = function (opts) {
   var defaults = {
