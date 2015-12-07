@@ -25,15 +25,13 @@ var writeFile = function (fileName, page) {
   });
 }
 
-var readFile = function (name) {
-  if (name.indexOf('/') === 0) {
-    name.slice(0, 1);
-  }
+var readFile = function (dataPath, templatePath) {
+  var self = this;
 
-  fs.readFile(options.content + '/' + name +'.md', 'utf8', function (err, data) {
+  fs.readFile(options.content + '/' + dataPath +'.md', 'utf8', function (err, data) {
     if (data) {
-      var page = template.render(properties['defaultTemplate'], { content : marked(data) } );
-      writeFile(name + '.html', page);
+      var page = template.render(templatePath, { content : marked(data) } );
+      writeFile(dataPath + '.html', page);
     }
   });
 };
@@ -51,27 +49,70 @@ var RoboCoffee = function (opts) {
 
   options = _.assign(defaults, opts);
 
-  this.set('defaultTemplate', 'default');
-  this.set('defaultController', readFile);
+  this.register('defaultTemplate', 'default');
+  this.register('defaultController', readFile);
 };
 
-RoboCoffee.prototype.set = function (key, value) {
+/**
+ * Register property with RoboCoffee property hash.
+ * @param  {string} key   Lookup key.
+ * @param  {any} value Property to store. Can be any valid JavaScript type.
+ * @return {undefined}
+ */
+RoboCoffee.prototype.register = function (key, value) {
   properties = properties || {};
 
   properties[key] = value;
 };
 
-RoboCoffee.prototype.get = function (key) {
+/**
+ * Retrieve property from RoboCoffee property hash.
+ * @param  {String} key Lookup key.
+ * @return {any} Returns stored property. Can be any valid JavaScript type.
+ */
+RoboCoffee.prototype.retrieve = function (key) {
   properties = properties || {};
 
   return properties[key];
 };
 
-RoboCoffee.prototype.route = function (route, controller) {
-  controller = controller || this.get('defaultController');
-  router.route(route, controller);
+/**
+ * Registers Route
+ * @param  {String} route      [Route]
+ * @param  {Function} controller [Controller function for route.]
+ * @param  {String} controller [Path to data file for route. (default is route)]
+ * @param  {String} template   [path to template that controller should render]
+ * @return {[type]}            [description]
+ */
+RoboCoffee.prototype.route = function (route, controller, templatePath) {
+
+  var self = this;
+
+  var dataPath;
+
+  if (typeof controller == 'string') {
+    dataPath = controller;
+    controller = this.retrieve('defaultController');
+  } else {
+    dataPath = route.indexOf('/') === 0 ? route.slice(1) : route;
+    controller = controller || this.retrieve('defaultController');
+  }
+
+  templatePath = templatePath || this.retrieve('defaultTemplate');
+
+  // Make sure the controller function is called with 'robocoffee' as context;
+  var c = function (route) {
+    controller.call(self, dataPath, templatePath);
+  }
+
+  router.route(route, c);
 };
 
+/**
+ * Wraps router.runroute()
+ * @param  {string} route Lookup key for router.
+ * @return {undefined}
+ */
 RoboCoffee.prototype.runRoute = function (route) {
   router.runRoute(route);
 };
