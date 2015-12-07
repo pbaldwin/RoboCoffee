@@ -3,8 +3,8 @@ var RoboCoffee = require('./RoboCoffee');
 var robocoffee = new RoboCoffee();
 
 robocoffee.route('/', function () {
-  var controller = robocoffee.get('defaultController');
-  controller.call(robocoffee, 'index');
+  var controller = this.retrieve('defaultController');
+  controller.call(this, 'index');
 });
 
 robocoffee.route('/foo');

@@ -26,13 +26,15 @@ var writeFile = function (fileName, page) {
 }
 
 var readFile = function (name) {
+  var self = this;
+
   if (name.indexOf('/') === 0) {
     name.slice(0, 1);
   }
 
   fs.readFile(options.content + '/' + name +'.md', 'utf8', function (err, data) {
     if (data) {
-      var page = template.render(properties['defaultTemplate'], { content : marked(data) } );
+      var page = template.render(self.retrieve('defaultTemplate'), { content : marked(data) } );
       writeFile(name + '.html', page);
     }
   });
@@ -51,25 +53,32 @@ var RoboCoffee = function (opts) {
 
   options = _.assign(defaults, opts);
 
-  this.set('defaultTemplate', 'default');
-  this.set('defaultController', readFile);
+  this.assign('defaultTemplate', 'default');
+  this.assign('defaultController', readFile);
 };
 
-RoboCoffee.prototype.set = function (key, value) {
+RoboCoffee.prototype.assign = function (key, value) {
   properties = properties || {};
 
   properties[key] = value;
 };
 
-RoboCoffee.prototype.get = function (key) {
+RoboCoffee.prototype.retrieve = function (key) {
   properties = properties || {};
 
   return properties[key];
 };
 
 RoboCoffee.prototype.route = function (route, controller) {
-  controller = controller || this.get('defaultController');
-  router.route(route, controller);
+  controller = controller || this.retrieve('defaultController');
+
+  var self = this;
+
+  var c = function (path) {
+    controller.call(self, path);
+  }
+
+  router.route(route, c);
 };
 
 RoboCoffee.prototype.runRoute = function (route) {
